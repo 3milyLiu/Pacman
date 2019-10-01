@@ -16,7 +16,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -59,7 +59,7 @@ class RandomishAgent(Agent):
     # Create a variable to hold the last action
     def __init__(self):
          self.last = Directions.STOP
-    
+
     def getAction(self, state):
         # Get the actions we can try, and remove "STOP" if that is one of them.
         legal = api.legalActions(state)
@@ -107,7 +107,7 @@ class SensingAgent(Agent):
         # Where are the capsules?
         print "Capsule locations:"
         print api.capsules(state)
-        
+
         # Where is the food?
         print "Food locations: "
         print api.food(state)
@@ -115,7 +115,76 @@ class SensingAgent(Agent):
         # Where are the walls?
         print "Wall locations: "
         print api.walls(state)
-        
+
         # getAction has to return a move. Here we pass "STOP" to the
         # API to ask Pacman to stay where they are.
         return api.makeMove(Directions.STOP, legal)
+
+# GoWestAgent
+#
+# Always tries to have Pacman go west on the grid when it is possible.
+class GoWestAgent(Agent):
+
+    def getAction(self, state):
+        # Get the actions we can try, and remove "STOP" if that is one of them.
+        legal = api.legalActions(state)
+        if Directions.WEST in legal:
+            return api.makeMove(Directions.WEST, legal)
+        else:
+            if Directions.STOP in legal:
+                legal.remove(Directions.STOP)
+            # Random choice between the legal options.
+            return api.makeMove(random.choice(legal), legal)
+
+# HungryAgent
+#
+# Uses information about the location of the food to try to move towards the
+# nearest food.
+class HungryAgent( Agent ):
+
+    def getAction( self, state ):
+        legal = api.legalActions( state )
+        if Directions.STOP in legal:
+            legal.remove( Directions.STOP )
+
+        successors = [ ( state.generateSuccessor( 0, action ), action ) for action in legal ]
+        scored = []
+        for state, action in successors:
+            score, dist = self.foodScore( state )
+            scored.append( (score, dist, action) )
+        bestScore = min( scored )[ 0 ]
+        bestActions = [ tp[1:] for tp in scored if tp[0] == bestScore ]
+        return sorted( bestActions, key = lambda x: x[0] )[ 0 ][ 1 ]
+
+    def foodScore( self, state ):
+        dist, food = self.nearestFood( state )
+        return len( api.food( state ) ), dist
+
+    def nearestFood( self, state ):
+        pacman = api.whereAmI( state )
+        foodMap = api.food( state )
+        if foodMap:
+            distances = [ abs( (x - pacman[ 0 ] ) ) + abs( ( y - pacman[ 1 ] ) ) for ( x, y ) in foodMap  ]
+            return min( zip( distances, foodMap ) )
+        else:
+            return ( 0, ( 0, 0 ) )
+
+# SurvivalAgent
+#
+# Uses the location of Pacman and the ghosts (and any other information that
+# may be helpful) to stay alive as long as possible.
+class SurvivalAgent( Agent ):
+
+    def getAction( self, state ):
+        legal = api.legalActions( state )
+        if Directions.STOP in legalMoves:
+            legal.remove( Directions.STOP )
+
+        successors = [ ( state.generateSuccessor( 0, action ), action ) for action in legal ]
+        scores = [ (self.ghostScore( api.whereAmI( state), api.ghosts( state)), action) for state, action in successors ]
+        bestScore = max( scores )[ 0 ]
+        bestActions = [ pair[ 1 ] for pair in scores if pair[ 0 ] == bestScore]
+        return random.choice( bestActions )
+
+    def ghostScore( self, pacman, ghosts ):
+        return min( [ util.manhattanDistance( pacman, ghost ) for ghost in ghosts ] )

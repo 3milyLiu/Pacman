@@ -280,9 +280,9 @@ class MDPAgent(Agent):
 
             #rewards and penalty
             ghostPenalty = -500
-            capsuleReward = 5
-            foodReward = 5
-            safeGhost = 5
+            capsuleReward = 10
+            foodReward = 10
+            safeGhost = 10
             noReward = 0
             doNotEnterPenalty = -500
             discountFactor = 0.7

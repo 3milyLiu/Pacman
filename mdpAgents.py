@@ -234,7 +234,7 @@ class MDPAgent(Agent):
             safeGhost = 10
             noReward = 0
             doNotEnterPenalty = -500
-            discountFactor = 0.7
+            discountFactor = 0.9
             iterations = 50
             while iterations > 0:
                 # a copy of the map, values are stored between iterations
@@ -285,7 +285,7 @@ class MDPAgent(Agent):
             safeGhost = 10
             noReward = 0
             doNotEnterPenalty = -500
-            discountFactor = 0.7
+            discountFactor = 0.9
             iterations = 50
             # value iteration
             while iterations > 0:
